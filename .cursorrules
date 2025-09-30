@@ -1,0 +1,601 @@
+# Next.js 15 Frontend Boilerplate - Cursor Rules
+
+## Project Overview
+This is a feature-based Next.js 15 frontend boilerplate with TypeScript, ShadCN/UI, Zustand, react-hook-form, and Zod. The architecture prioritizes type safety, component reusability, and maintainable code organization.
+
+## Tech Stack
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript (strict mode)
+- **Styling**: Tailwind CSS + ShadCN/UI (Radix UI)
+- **State Management**: Zustand
+- **Forms**: react-hook-form + Zod validation
+- **Icons**: react-icons with centralized service
+- **API**: Custom API client with middleware pattern
+- **Authentication**: NextAuth.js v5
+- **Error Tracking**: Sentry
+- **Code Quality**: ESLint + Prettier + Husky
+
+## Architecture Principles
+
+### 1. Feature-Based Organization
+```
+features/
+  auth/
+    actions/       # Server actions
+    components/    # Feature-specific components
+    pages/        # Feature pages
+    schemas/      # Zod validation schemas
+    store/        # Feature-specific Zustand stores
+    types/        # Feature-specific TypeScript types
+  [feature-name]/
+    ...
+shared/
+  components/     # Reusable UI components
+  hooks/         # Custom React hooks
+  icons/         # Centralized icon service
+  lib/           # Utilities and services
+  providers/     # React context providers
+  schema/        # Shared Zod schemas
+  store/         # Global Zustand stores
+  types/         # Shared TypeScript types
+  utils/         # Utility functions
+```
+
+### 2. Path Aliases (Use These Consistently)
+```typescript
+// Import patterns - ALWAYS use path aliases:
+import { api } from '@/shared/lib';
+import { Typography } from '@/shared/components';
+import { useModalStore } from '@/shared/store';
+import { LoginSchema } from '@features/auth/schemas';
+
+// Specific aliases for shared modules:
+import { } from '@shared/components';
+import { } from '@shared/components/server';
+import { } from '@shared/icons/server';
+import { } from '@shared/hooks';
+import { } from '@shared/types';
+import { } from '@shared/utils';
+import { } from '@shared/store';
+import { } from '@shared/schema';
+import { } from '@shared/provider';
+import { } from '@shared/lib';
+```
+
+## Code Style Guidelines
+
+### 1. TypeScript Standards
+- **Use strict typing**: Enable all TypeScript strict flags
+- **Avoid `any` type**: Always provide explicit types
+- **Use type inference**: Let TypeScript infer when obvious
+- **Generic components**: Use generics for reusable components
+- **Interface vs Type**: Use interfaces for objects, types for unions/primitives
+
+```typescript
+// ✅ GOOD: Proper typing with generics
+interface ComponentProps<T> {
+  data: T;
+  onSelect: (item: T) => void;
+}
+
+// ✅ GOOD: Type inference from Zod schemas
+type TLoginSchema = z.infer<typeof LoginSchema>;
+
+// ❌ BAD: Using any
+const handleData = (data: any) => { ... }
+
+// ✅ GOOD: Explicit typing
+const handleData = (data: UserData) => { ... }
+```
+
+### 2. Component Organization
+
+#### Component Structure
+Each component should be in its own folder with barrel exports:
+```
+components/
+  Button/
+    Button.tsx      # Main component
+    index.ts        # Barrel export: export * from './Button';
+  Typography/
+    Typography.tsx
+    index.ts
+```
+
+#### Component Patterns
+```typescript
+// ✅ GOOD: Component with proper TypeScript patterns
+interface ComponentProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: 'primary' | 'secondary';
+  size?: 'sm' | 'md' | 'lg';
+  children: React.ReactNode;
+}
+
+const Component = React.forwardRef<HTMLDivElement, ComponentProps>(
+  ({ className, variant = 'primary', size = 'md', children, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          componentVariants({ variant, size }),
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+Component.displayName = 'Component';
+
+// Use CVA for variant-based styling
+const componentVariants = cva(
+  'base-classes',
+  {
+    variants: {
+      variant: {
+        primary: 'variant-classes',
+        secondary: 'variant-classes',
+      },
+      size: {
+        sm: 'size-classes',
+        md: 'size-classes',
+        lg: 'size-classes',
+      },
+    },
+    defaultVariants: {
+      variant: 'primary',
+      size: 'md',
+    },
+  }
+);
+```
+
+#### Compound Components Pattern
+```typescript
+// ✅ GOOD: Compound component like Typography
+const Typography = ({ className, children }: TypographyProps) => (
+  <span className={className}>{children}</span>
+);
+
+Typography.HeadingSemiboldLarge = HeadingSemiboldLarge;
+Typography.BodyRegularMedium = BodyRegularMedium;
+// ... attach all variants
+
+export { Typography };
+```
+
+### 3. Server Components vs Client Components
+```typescript
+// ✅ Server Component (default)
+// No 'use client' directive needed
+export default function ServerComponent() {
+  return <div>Server rendered</div>;
+}
+
+// ✅ Client Component (when needed)
+'use client';
+
+import { useState } from 'react';
+
+export default function ClientComponent() {
+  const [state, setState] = useState(false);
+  return <button onClick={() => setState(!state)}>Toggle</button>;
+}
+```
+
+### 4. State Management (Zustand)
+
+#### Store Structure
+```typescript
+// ✅ GOOD: Zustand store pattern
+import { create } from 'zustand';
+
+type State = {
+  currentModal?: string;
+  isLoading: boolean;
+};
+
+type Actions = {
+  openModal: (modalType: string) => void;
+  closeModal: () => void;
+  setLoading: (loading: boolean) => void;
+};
+
+const useModalStore = create<State & Actions>((set) => ({
+  // State
+  currentModal: undefined,
+  isLoading: false,
+  
+  // Actions
+  openModal: (modalType: string) => set({ currentModal: modalType }),
+  closeModal: () => set({ currentModal: undefined }),
+  setLoading: (isLoading: boolean) => set({ isLoading }),
+}));
+
+export type { State as ModalState, Actions as ModalActions };
+export { useModalStore };
+```
+
+### 5. Forms & Validation
+
+#### Zod Schema Patterns
+```typescript
+// ✅ GOOD: Comprehensive schema with reusable patterns
+const PASSWORD_CONSTRAINTS = {
+  MIN_LENGTH: 8,
+  REQUIRES: {
+    NUMBER: /[0-9]/,
+    LOWERCASE: /[a-z]/,
+    UPPERCASE: /[A-Z]/,
+    SYMBOL: /[^a-zA-Z0-9]/,
+  },
+} as const;
+
+const PASSWORD_ERROR_MESSAGES = {
+  REQUIRED: 'Password is required',
+  MIN_LENGTH: `Password must be at least ${PASSWORD_CONSTRAINTS.MIN_LENGTH} characters long`,
+  // ... more messages
+} as const;
+
+const createPasswordValidator = () => {
+  return z
+    .string({ required_error: PASSWORD_ERROR_MESSAGES.REQUIRED })
+    .min(PASSWORD_CONSTRAINTS.MIN_LENGTH, {
+      message: PASSWORD_ERROR_MESSAGES.MIN_LENGTH,
+    })
+    .regex(PASSWORD_CONSTRAINTS.REQUIRES.NUMBER, {
+      message: PASSWORD_ERROR_MESSAGES.NUMBER,
+    });
+    // ... more validations
+};
+
+const LoginSchema = z.object({
+  email: EmailSchema,
+  password: createPasswordValidator(),
+});
+
+// Export both schema and resolver
+export { LoginSchema };
+export const LoginSchemaResolver = zodResolver(LoginSchema);
+export type TLoginSchema = z.infer<typeof LoginSchema>;
+```
+
+#### Form Component Usage
+```typescript
+// ✅ GOOD: Form with react-hook-form + Zod
+const LoginForm = () => {
+  const form = useForm<TLoginSchema>({
+    resolver: LoginSchemaResolver,
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  const onSubmit = async (data: TLoginSchema) => {
+    // Handle form submission
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required>Email</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* More fields */}
+      </form>
+    </Form>
+  );
+};
+```
+
+### 6. Server Actions
+```typescript
+// ✅ GOOD: Server action pattern
+'use server';
+
+import { api } from '@/shared/lib';
+
+const login = async ({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) => {
+  const data = await api.post('/auth/jwt/login', {
+    email,
+    password,
+  });
+
+  return data;
+};
+
+export { login };
+```
+
+### 7. API Client Usage
+```typescript
+// ✅ GOOD: Using the API client
+import { api } from '@/shared/lib';
+
+// GET request
+const fetchUsers = async () => {
+  return await api.get<User[]>('/users');
+};
+
+// POST request
+const createUser = async (userData: CreateUserData) => {
+  return await api.post<User>('/users', userData);
+};
+
+// With multipart (file upload)
+const uploadFile = async (formData: FormData) => {
+  return await api.post<UploadResponse>('/upload', formData, true);
+};
+```
+
+### 8. Icon Usage
+```typescript
+// ✅ GOOD: Import from centralized icon service
+import { 
+  BsEye, 
+  BsEyeSlash, 
+  MdOutlineClose 
+} from '@shared/icons/server';
+
+// ✅ GOOD: Add new icons to shared/icons/server.ts
+// When adding new icons, update the server.ts file:
+export { NewIcon } from 'react-icons/new-library';
+```
+
+### 9. Typography Usage
+```typescript
+// ✅ GOOD: Use Typography component consistently
+import { Typography } from '@shared/components';
+
+const Component = () => (
+  <div>
+    <Typography.HeadingSemiboldLarge className="mb-4">
+      Page Title
+    </Typography.HeadingSemiboldLarge>
+    
+    <Typography.BodyRegularMedium className="text-muted-foreground">
+      Body text content
+    </Typography.BodyRegularMedium>
+  </div>
+);
+```
+
+## File Naming Conventions
+
+### 1. File Extensions
+- **React Components**: `.tsx`
+- **Utility Functions**: `.ts`
+- **Type Definitions**: `.ts`
+- **Configuration Files**: `.ts` or `.mjs`
+
+### 2. Naming Patterns
+```
+// ✅ GOOD: Component files
+Button.tsx
+UserProfile.tsx
+LoginForm.tsx
+
+// ✅ GOOD: Utility files
+apiClient.ts
+dateUtils.ts
+validators.ts
+
+// ✅ GOOD: Type files
+userTypes.ts
+apiTypes.ts
+
+// ✅ GOOD: Schema files
+authSchema.ts
+userSchema.ts
+
+// ✅ GOOD: Store files
+useAuthStore.ts
+useModalStore.ts
+
+// ✅ GOOD: Action files
+login.ts
+signup.ts
+resetPassword.ts
+```
+
+### 3. Barrel Exports
+Always use barrel exports (index.ts) for clean imports:
+```typescript
+// ✅ GOOD: features/auth/index.ts
+export * from './components';
+export * from './actions';
+export * from './schemas';
+export * from './types';
+
+// ✅ GOOD: shared/components/index.ts
+export * from './Button';
+export * from './Typography';
+export * from './Form';
+```
+
+## Styling Guidelines
+
+### 1. Tailwind CSS Usage
+```typescript
+// ✅ GOOD: Use tailwind-merge for className conflicts
+import { cn } from '@/shared/utils';
+
+const Component = ({ className }) => (
+  <div className={cn('base-classes', className)}>
+    Content
+  </div>
+);
+
+// ✅ GOOD: Use CVA for variant-based styling
+import { cva } from 'class-variance-authority';
+
+const buttonVariants = cva(
+  'base-button-classes',
+  {
+    variants: {
+      variant: {
+        default: 'default-classes',
+        destructive: 'destructive-classes',
+      },
+      size: {
+        default: 'default-size-classes',
+        sm: 'small-size-classes',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  }
+);
+```
+
+### 2. Component Styling Patterns
+- Use Design System values (spacing, colors, typography) consistently
+- Prefer Tailwind utilities over custom CSS
+- Use ShadCN/UI components as base, extend with variants
+- Maintain consistent spacing and sizing patterns
+
+## Error Handling
+
+### 1. API Error Handling
+```typescript
+// ✅ GOOD: Proper error handling with types
+try {
+  const response = await api.post<UserData>('/users', userData);
+  return response.data;
+} catch (error) {
+  if (error instanceof ApiException) {
+    // Handle API-specific errors
+    console.error('API Error:', error.message, error.status);
+  } else {
+    // Handle unexpected errors
+    console.error('Unexpected error:', error);
+  }
+  throw error;
+}
+```
+
+### 2. Form Error Handling
+Form errors are automatically handled by react-hook-form + Zod integration. Use FormMessage components to display errors.
+
+## Performance Guidelines
+
+### 1. Component Optimization
+- Use React.memo for expensive components
+- Use useCallback for event handlers passed to children
+- Use useMemo for expensive calculations
+- Prefer server components when possible
+
+### 2. Import Optimization
+```typescript
+// ✅ GOOD: Specific imports
+import { Button } from '@shared/components';
+import { useState, useEffect } from 'react';
+
+// ❌ BAD: Default imports for libraries
+import * as React from 'react';
+
+// ✅ GOOD: Tree-shakeable imports
+import { format } from 'date-fns';
+```
+
+## Accessibility Guidelines
+
+- Use semantic HTML elements
+- Provide proper ARIA labels and descriptions
+- Ensure keyboard navigation works
+- Use FormLabel with proper htmlFor attributes
+- Test with screen readers
+- Maintain proper color contrast ratios
+
+## Testing Considerations
+
+When writing tests (when they are added):
+- Test component behavior, not implementation
+- Use TypeScript for test files
+- Mock API calls and external dependencies
+- Test form validation and error states
+- Test accessibility features
+
+## Code Quality Rules
+
+### 1. ESLint Rules
+The project uses comprehensive ESLint rules. Follow them strictly:
+- No unused imports (automatically removed by unused-imports plugin)
+- Proper React hooks usage
+- Accessibility compliance
+- Import/export organization
+- TypeScript best practices
+
+### 2. Prettier Configuration
+Code formatting is handled by Prettier with Tailwind CSS plugin. Always format before committing.
+
+### 3. Git Commit Standards
+Use conventional commits:
+```
+feat: add user authentication feature
+fix: resolve form validation issue
+docs: update API documentation
+style: format code with prettier
+refactor: improve component organization
+test: add user registration tests
+```
+
+## Key Principles to Follow
+
+1. **Type Safety First**: Always use proper TypeScript typing
+2. **Component Composition**: Build complex UIs from simple, reusable components
+3. **Feature Isolation**: Keep features self-contained with shared utilities
+4. **Consistent Patterns**: Follow established patterns for components, stores, and schemas
+5. **Performance Awareness**: Consider server vs client components
+6. **Accessibility**: Ensure all components are accessible
+7. **Error Handling**: Implement comprehensive error handling
+8. **Code Quality**: Maintain high code quality with linting and formatting
+
+## Common Patterns to Avoid
+
+❌ **Don't**:
+- Use `any` type
+- Create components without proper TypeScript interfaces
+- Skip barrel exports
+- Use direct file imports instead of path aliases
+- Create client components unnecessarily
+- Skip form validation
+- Use inline styles instead of Tailwind classes
+- Create global state for local component state
+- Skip error handling in API calls
+- Ignore accessibility requirements
+
+✅ **Do**:
+- Use strict TypeScript typing
+- Create reusable, composable components
+- Use barrel exports consistently
+- Use path aliases for all imports
+- Prefer server components when possible
+- Use Zod for all form validation
+- Use Tailwind CSS with proper utilities
+- Use Zustand for shared state, local state for component-specific data
+- Handle all API errors properly
+- Implement proper accessibility features
+
+This boilerplate emphasizes maintainability, type safety, and developer experience. Follow these guidelines to maintain consistency and quality across the codebase.
