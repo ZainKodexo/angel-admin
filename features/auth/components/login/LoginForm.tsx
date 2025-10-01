@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 
 import { login } from '@/features/auth/actions';
 import { Button, Form, InputFormField } from '@/shared/components';
+import { AUTH_QUERY } from '../../utils';
 
 const LoginForm = () => {
   const router = useRouter();
@@ -24,13 +25,13 @@ const LoginForm = () => {
     },
   });
 
-  const { execute } = useActionWithFeedback(login);
-
-  const action: () => void = form.handleSubmit(async (data) => {
-    const response = await execute(data);
-    if (response.success) router.replace('/');
+  const { mutate, isPending } = useActionWithFeedback({
+    mutationFn: login,
+    mutationKey: [AUTH_QUERY.LOGIN],
+    onSuccess: () => {
+      router.replace('/auth/login');
+    },
   });
-
   return (
     <div className="grid h-full items-center justify-items-center overflow-auto">
       <Card className="w-full">
@@ -42,7 +43,10 @@ const LoginForm = () => {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form action={action} className="space-y-6">
+            <form
+              onSubmit={form.handleSubmit((data) => mutate(data))}
+              className="space-y-6"
+            >
               <div className="space-y-6">
                 <InputFormField
                   label="Email Address"
@@ -61,7 +65,7 @@ const LoginForm = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button isLoading={isPending} type="submit" className="w-full">
                 Login
               </Button>
             </form>

@@ -1,6 +1,4 @@
 'use client';
-
-import { UserNav } from '../UserNav';
 import { SidebarTrigger } from '../Sidebar/SidebarElements';
 import { Separator, Breadcrumb } from '@/shared/components';
 import { ThemeToggle } from '../ThemeToggle';
@@ -15,8 +13,6 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-2 px-4">
-        <div className="hidden md:flex">{/* <SearchInput /> */}</div>
-        <UserNav />
         <ThemeToggle />
       </div>
     </header>

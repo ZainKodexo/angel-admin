@@ -4,6 +4,7 @@ import {
   EmailStepSchemaResolver,
   TEmailStepSchema,
 } from '@/features/auth/schemas';
+import { AUTH_QUERY } from '@/features/auth/utils';
 import {
   Button,
   buttonVariants,
@@ -18,7 +19,7 @@ import {
   CardTitle,
   Typography,
 } from '@/shared/components/server';
-import { useActionWithFeedback } from '@/shared/hooks';
+import { useActionWithFeedbackAsync } from '@/shared/hooks';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 
@@ -27,7 +28,6 @@ type EmailStepProps = {
 };
 
 const EmailStep = ({ onNext }: EmailStepProps) => {
-  const { execute } = useActionWithFeedback(forgetPassword);
   const form = useForm<TEmailStepSchema>({
     resolver: EmailStepSchemaResolver,
     defaultValues: {
@@ -35,14 +35,18 @@ const EmailStep = ({ onNext }: EmailStepProps) => {
     },
   });
 
-  const action: () => void = form.handleSubmit(async (data) => {
-    const response = await execute(data);
-    if (response.success) {
+  const { mutateAsync, isPending } = useActionWithFeedbackAsync({
+    mutationFn: forgetPassword,
+    mutationKey: [AUTH_QUERY.FORGET_PASSWORD_EMAIL_STEP],
+  });
+
+  const onSubmit = async (data: TEmailStepSchema) => {
+    const { success } = await mutateAsync(data);
+    if (success) {
       localStorage.setItem('email', data.email);
       onNext();
     }
-  });
-
+  };
   return (
     <>
       <CardHeader>
@@ -53,7 +57,7 @@ const EmailStep = ({ onNext }: EmailStepProps) => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form action={action} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-4">
               <InputFormField
                 name="email"
@@ -64,7 +68,7 @@ const EmailStep = ({ onNext }: EmailStepProps) => {
               />
             </div>
 
-            <Button type="submit" className="w-full">
+            <Button isLoading={isPending} type="submit" className="w-full">
               Continue
             </Button>
 
