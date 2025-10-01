@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/components/server';
-import { useActionWithFeedback } from '@/shared/hooks';
+import { useActionWithFeedbackAsync } from '@/shared/hooks';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
@@ -28,18 +28,18 @@ const PasswordStep = () => {
     },
   });
 
-  const resetPasswordAction = useActionWithFeedback({
+  const { mutateAsync, isPending } = useActionWithFeedbackAsync({
     mutationFn: resetPassword,
     mutationKey: [AUTH_QUERY.RESET_PASSWORD],
-    onSuccess: () => {
-      router.push('login');
-      localStorage.removeItem('email');
-    },
   });
 
-  const onResetPassword = (data: TResetPasswordSchema) => {
+  const onResetPassword = async (data: TResetPasswordSchema) => {
     const payload = { ...data, email: email };
-    resetPasswordAction.mutate(payload);
+    const { success } = await mutateAsync(payload);
+    if (success) {
+      localStorage.removeItem('email');
+      router.push('/auth/login');
+    }
   };
   return (
     <>
@@ -72,7 +72,7 @@ const PasswordStep = () => {
                 label="Confirm Password"
               />
             </div>
-            <Button type="submit" className="w-full">
+            <Button isLoading={isPending} type="submit" className="w-full">
               Update Password
             </Button>
           </form>
