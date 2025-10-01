@@ -17,6 +17,7 @@ import { AUTH_QUERY } from '../../utils';
 
 const LoginForm = () => {
   const router = useRouter();
+
   const form = useForm<TLoginSchema>({
     resolver: LoginSchemaResolver,
     defaultValues: {
@@ -29,7 +30,7 @@ const LoginForm = () => {
     mutationFn: login,
     mutationKey: [AUTH_QUERY.LOGIN],
     onSuccess: () => {
-      router.replace('/auth/login');
+      router.replace('/prompts');
     },
   });
   return (

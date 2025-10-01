@@ -5,7 +5,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex min-h-screen w-full">
       <SidebarLayout>
         <Header />
-        {children}
+        <main className="p-4">{children}</main>
       </SidebarLayout>
     </div>
   );

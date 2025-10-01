@@ -9,20 +9,9 @@ type BreadcrumbItem = {
 };
 
 const routeMapping: Record<string, BreadcrumbItem[]> = {
-  '/': [
-    { title: 'Dashboard', link: '/' },
-    { title: 'Overview', link: '/' },
-  ],
-  '/chat': [
-    { title: 'Dashboard', link: '/' },
-    { title: 'Chat', link: '/chat' },
-  ],
-
-  // '/dashboard/product': [
-  //   { title: 'Dashboard', link: '/dashboard' },
-  //   { title: 'Product', link: '/dashboard/product' }
-  // ]
-  // Add more custom mappings as needed
+  '/': [{ title: 'Dashboard', link: '/' }],
+  '/prompts': [{ title: 'AI Prompts', link: '/prompts' }],
+  '/email-templates': [{ title: 'Email Templates', link: '/email-templates' }],
 };
 
 function useBreadcrumbs() {
