@@ -4,5 +4,9 @@ export type TPrompt = {
   id: string;
   name: string;
   content: string;
-  type: TPromptCategory;
+  prompt_type: TPromptCategory;
+  is_active: boolean;
+  tags: string[];
+  step: string;
+  session_type: string;
 };

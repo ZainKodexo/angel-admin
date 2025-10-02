@@ -9,15 +9,35 @@ import {
   Textarea,
   Typography,
 } from '@/shared/components/server';
-import { Check, X, Edit, RotateCcw } from '@/shared/icons/server';
-import { TPrompt } from '../types';
+import { useActionWithFeedback } from '@/shared/hooks';
+import { Check, Edit, X } from '@/shared/icons/server';
+import { useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
+import { updatePrompt } from '../actions';
+import { TPrompt } from '../types';
+import { PromptQueryKey } from '../utils';
 
 export const PromptCard = (prompt: TPrompt) => {
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = React.useState(false);
+  const [promptContent, setPromptContent] = React.useState<string>(
+    prompt.content,
+  );
+
+  const { mutate, isPending } = useActionWithFeedback({
+    mutationFn: updatePrompt,
+    mutationKey: PromptQueryKey.prompt.update(prompt.id),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: PromptQueryKey.prompt.all });
+    },
+  });
 
   const editCancelToggle = () => {
     setIsEditing(!isEditing);
+  };
+
+  const onSave = () => {
+    mutate({ id: prompt.id, content: promptContent });
   };
   return (
     <Card key={prompt.id} className="mb-4">
@@ -26,22 +46,28 @@ export const PromptCard = (prompt: TPrompt) => {
           <div>
             <CardTitle className="text-lg">{prompt.name}</CardTitle>
             <div className="mt-2 flex gap-2">
-              <Badge variant="secondary" className="text-xs">
-                Single Therapy
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                Regular Session
-              </Badge>
+              {prompt.tags.map((item) => (
+                <Badge key={item} variant="default" className="text-xs">
+                  {item}
+                </Badge>
+              ))}
             </div>
           </div>
           <div className="flex gap-2">
             {isEditing ? (
               <>
-                <Button size="sm" className="gap-1">
+                <Button
+                  onClick={onSave}
+                  disabled={isPending}
+                  type="button"
+                  size="sm"
+                  className="gap-1"
+                >
                   <Check className="h-3 w-3" />
                   Save
                 </Button>
                 <Button
+                  disabled={isPending}
                   onClick={editCancelToggle}
                   size="sm"
                   variant="outline"
@@ -62,10 +88,6 @@ export const PromptCard = (prompt: TPrompt) => {
                   <Edit className="h-3 w-3" />
                   Edit
                 </Button>
-                <Button size="sm" variant="outline" className="gap-1">
-                  <RotateCcw className="h-3 w-3" />
-                  Restore
-                </Button>
               </>
             )}
           </div>
@@ -74,12 +96,13 @@ export const PromptCard = (prompt: TPrompt) => {
       <CardContent>
         {isEditing ? (
           <Textarea
-            defaultValue={prompt.content}
-            className="min-h-32 resize-none"
+            defaultValue={promptContent}
+            className="max-h-96 resize-none"
             placeholder="Enter your prompt content..."
+            onChange={(e) => setPromptContent(e.target.value)}
           />
         ) : (
-          <div className="bg-muted rounded-md p-4">
+          <div className="bg-muted max-h-96 overflow-y-auto rounded-md p-4">
             <Typography.BodyRegularMedium className="text-muted-foreground text-sm whitespace-pre-wrap">
               {prompt.content}
             </Typography.BodyRegularMedium>

@@ -13,11 +13,14 @@ import {
   CardTitle,
 } from '@/shared/components/server';
 import { useActionWithFeedbackAsync } from '@/shared/hooks';
-import { useRouter } from 'next/navigation';
+import { FC } from 'react';
 import { useForm } from 'react-hook-form';
 
-const PasswordStep = () => {
-  const router = useRouter();
+type PasswordStepProps = {
+  onNext: () => void;
+};
+
+const PasswordStep: FC<PasswordStepProps> = ({ onNext }) => {
   const email = localStorage.getItem('email') || '';
 
   const form = useForm<TResetPasswordSchema>({
@@ -38,7 +41,7 @@ const PasswordStep = () => {
     const { success } = await mutateAsync(payload);
     if (success) {
       localStorage.removeItem('email');
-      router.push('/auth/login');
+      onNext();
     }
   };
   return (
