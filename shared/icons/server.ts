@@ -23,6 +23,7 @@ import {
   X,
   Edit,
   RotateCcw,
+  Info,
 } from 'lucide-react';
 
 export {
@@ -49,4 +50,5 @@ export {
   X,
   Edit,
   RotateCcw,
+  Info,
 };
