@@ -1,42 +1,20 @@
-import {
-  RxDashboard,
-  IoChatboxEllipsesOutline,
-  IoSettingsOutline,
-} from '@/shared/icons/server';
-
-const AWS_S3 = process.env.NEXT_PUBLIC_S3_PUBLIC;
+import { IoChatboxEllipsesOutline, RxDashboard } from '@/shared/icons/server';
 
 const NAV_ITEMS = [
   {
-    title: 'Home',
-    url: '/',
+    title: 'AI Prompts',
+    url: '/prompts',
     icon: RxDashboard,
     isActive: true,
     items: [],
   },
   {
-    title: 'Chat',
-    url: '/chat',
+    title: 'Email Templates',
+    url: '/email-templates',
     icon: IoChatboxEllipsesOutline,
     isActive: false,
     items: [],
   },
-  {
-    title: 'Settings',
-    url: '#',
-    icon: IoSettingsOutline,
-    isActive: false,
-    items: [
-      {
-        title: 'Profile',
-        url: '/settings/profile',
-      },
-      {
-        title: 'Subscription',
-        url: '/settings/subscription-management',
-      },
-    ],
-  },
 ];
 
-export { AWS_S3, NAV_ITEMS };
+export { NAV_ITEMS };

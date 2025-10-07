@@ -24,7 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" enableSystem>
           <ReactQueryProvider>
-            <NextTopLoader showSpinner={false} color="#ffffff" />
+            <NextTopLoader showSpinner={false} color="#759b6d" />
             <Toaster />
             {children}
             <GlobalModal />

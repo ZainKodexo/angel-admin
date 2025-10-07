@@ -2,10 +2,10 @@ import { Header, SidebarLayout } from '@/shared/components';
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="flex h-screen w-full flex-col">
       <SidebarLayout>
         <Header />
-        {children}
+        <main className="flex-1 overflow-auto p-4">{children}</main>
       </SidebarLayout>
     </div>
   );
