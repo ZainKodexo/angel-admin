@@ -53,7 +53,7 @@ const EmailStepSchema = z.object({
 });
 
 const OtpStepSchema = z.object({
-  token: z.string().min(5, 'Otp must be of length 5 characters long'),
+  OTP: z.string().min(4, 'Otp must be of length 5 characters long'),
 });
 
 const LoginSchema = z.object({

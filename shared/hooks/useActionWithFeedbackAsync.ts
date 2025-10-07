@@ -49,13 +49,13 @@ interface ActionWithFeedbackProps<T, R>
   successToast?: boolean;
 }
 
-function useActionWithFeedback<T, R>({
+function useActionWithFeedbackAsync<T, R>({
   onSuccess,
   onError,
   successToast = true,
   ...mutationOptions
 }: ActionWithFeedbackProps<T, R>) {
-  const { mutate, isPending } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     onSuccess: (data: ApiResponse<R>, _variables: T, _context: unknown) => {
       if (data.success) {
         if (successToast) {
@@ -76,9 +76,9 @@ function useActionWithFeedback<T, R>({
   });
 
   return {
-    mutate,
+    mutateAsync,
     isPending,
   };
 }
 
-export { useActionWithFeedback };
+export { useActionWithFeedbackAsync };

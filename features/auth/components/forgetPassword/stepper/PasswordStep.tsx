@@ -4,6 +4,7 @@ import {
   ResetPasswordSchemaResolver,
   TResetPasswordSchema,
 } from '@/features/auth/schemas';
+import { AUTH_QUERY } from '@/features/auth/utils';
 import { Button, Form, InputFormField } from '@/shared/components';
 import {
   CardContent,
@@ -18,7 +19,6 @@ import { useForm } from 'react-hook-form';
 const PasswordStep = () => {
   const router = useRouter();
   const email = localStorage.getItem('email') || '';
-  const resetPasswordAction = useActionWithFeedback(resetPassword);
 
   const form = useForm<TResetPasswordSchema>({
     resolver: ResetPasswordSchemaResolver,
@@ -28,16 +28,19 @@ const PasswordStep = () => {
     },
   });
 
-  const action: () => void = form.handleSubmit(async (data) => {
-    const payload = { ...data, email: email };
-    const { success } = await resetPasswordAction.execute(payload);
-
-    if (success) {
+  const resetPasswordAction = useActionWithFeedback({
+    mutationFn: resetPassword,
+    mutationKey: [AUTH_QUERY.RESET_PASSWORD],
+    onSuccess: () => {
       router.push('login');
       localStorage.removeItem('email');
-    }
+    },
   });
 
+  const onResetPassword = (data: TResetPasswordSchema) => {
+    const payload = { ...data, email: email };
+    resetPasswordAction.mutate(payload);
+  };
   return (
     <>
       <CardHeader>
@@ -49,7 +52,10 @@ const PasswordStep = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form action={action} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onResetPassword)}
+            className="space-y-6"
+          >
             <div className="space-y-4">
               <InputFormField
                 control={form.control}

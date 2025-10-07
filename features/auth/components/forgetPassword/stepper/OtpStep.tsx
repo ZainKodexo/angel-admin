@@ -1,6 +1,7 @@
 'use client';
 import { forgetPassword, verifyOtp } from '@/features/auth/actions';
 import { OtpStepSchemaResolver, TOtpStepSchema } from '@/features/auth/schemas';
+import { AUTH_QUERY } from '@/features/auth/utils';
 import {
   Button,
   Form,
@@ -29,28 +30,36 @@ type OtpStepProps = {
 
 const OtpStep = ({ onNext }: OtpStepProps) => {
   const email = localStorage.getItem('email') || '';
-  const forgetPasswordAction = useActionWithFeedback(forgetPassword);
-  const verifyOtpAction = useActionWithFeedback(verifyOtp);
+
   const form = useForm<TOtpStepSchema>({
     resolver: OtpStepSchemaResolver,
     defaultValues: {
-      token: '',
+      OTP: '',
+    },
+  });
+
+  const resendEmailAction = useActionWithFeedback({
+    mutationFn: forgetPassword,
+    mutationKey: [AUTH_QUERY.VERIFY_TOKEN],
+  });
+
+  const verifyOtpAction = useActionWithFeedback({
+    mutationFn: verifyOtp,
+    mutationKey: [AUTH_QUERY.RESEND_EMAIL],
+    onSuccess: () => {
+      onNext();
     },
   });
 
   const resendEmail = async () => {
     const payload = { email: email };
-    await forgetPasswordAction.execute(payload);
+    resendEmailAction.mutate(payload);
   };
 
-  const action: () => void = form.handleSubmit(async (data) => {
-    const payload = { token: +data.token };
-    const { success } = await verifyOtpAction.execute(payload);
-    if (success) {
-      onNext();
-    }
-  });
-
+  const onVerify = (data: TOtpStepSchema) => {
+    const payload = { email: email, OTP: data.OTP };
+    verifyOtpAction.mutate(payload);
+  };
   return (
     <>
       <CardHeader>
@@ -63,11 +72,11 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form action={action} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onVerify)} className="space-y-6">
             <div className="flex justify-center space-y-4">
               <FormField
                 control={form.control}
-                name="token"
+                name="OTP"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -78,7 +87,6 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
                             <InputOTPSlot index={1} />
                             <InputOTPSlot index={2} />
                             <InputOTPSlot index={3} />
-                            <InputOTPSlot index={4} />
                           </InputOTPGroup>
                         </InputOTP>
                       </div>
@@ -89,7 +97,11 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
               />
             </div>
 
-            <Button type="submit" className="w-full">
+            <Button
+              isLoading={verifyOtpAction.isPending}
+              type="submit"
+              className="w-full"
+            >
               Reset Password
             </Button>
 
