@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light">
           <ReactQueryProvider>
             <NextTopLoader showSpinner={false} color="#759b6d" />
             <Toaster />

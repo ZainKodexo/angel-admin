@@ -27,6 +27,9 @@ export const PromptCard = (prompt: TPrompt) => {
   const { mutate, isPending } = useActionWithFeedback({
     mutationFn: updatePrompt,
     mutationKey: PromptQueryKey.prompt.update(prompt.id),
+    onSuccess: () => {
+      editCancelToggle();
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: PromptQueryKey.prompt.all });
     },
