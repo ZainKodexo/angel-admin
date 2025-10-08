@@ -21,7 +21,10 @@ import {
   CardTitle,
   Typography,
 } from '@/shared/components/server';
-import { useActionWithFeedback } from '@/shared/hooks';
+import {
+  useActionWithFeedback,
+  useActionWithFeedbackAsync,
+} from '@/shared/hooks';
 import { useForm } from 'react-hook-form';
 
 type OtpStepProps = {
@@ -43,7 +46,7 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
     mutationKey: [AUTH_QUERY.VERIFY_TOKEN],
   });
 
-  const verifyOtpAction = useActionWithFeedback({
+  const verifyOtpAction = useActionWithFeedbackAsync({
     mutationFn: verifyOtp,
     mutationKey: [AUTH_QUERY.RESEND_EMAIL],
     onSuccess: () => {
@@ -56,9 +59,12 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
     resendEmailAction.mutate(payload);
   };
 
-  const onVerify = (data: TOtpStepSchema) => {
+  const onVerify = async (data: TOtpStepSchema) => {
     const payload = { email: email, OTP: data.OTP };
-    verifyOtpAction.mutate(payload);
+    const response = await verifyOtpAction.mutateAsync(payload);
+    if (!response.success) {
+      form.reset();
+    }
   };
   return (
     <>
@@ -66,8 +72,8 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
         <CardTitle>Check your email</CardTitle>
         <CardDescription>
           We sent a reset link to{' '}
-          <span className="text-content-brand">{email} </span> enter 5 digit
-          code that mentioned in the email
+          <span className="text-primary font-semibold">{email} </span> enter 4
+          digit code that mentioned in the email
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -80,8 +86,8 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <div className="flex w-fit justify-center">
-                        <InputOTP maxLength={5} {...field}>
+                      <div className="flex justify-center">
+                        <InputOTP maxLength={4} {...field}>
                           <InputOTPGroup>
                             <InputOTPSlot index={0} />
                             <InputOTPSlot index={1} />

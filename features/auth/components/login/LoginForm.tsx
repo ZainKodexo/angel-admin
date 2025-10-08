@@ -34,46 +34,44 @@ const LoginForm = () => {
     },
   });
   return (
-    <div className="grid h-full items-center justify-items-center overflow-auto">
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Welcome to Angel Admin</CardTitle>
-          <CardDescription>
-            Kindly fill in your details below to login
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit((data) => mutate(data))}
-              className="space-y-6"
-            >
-              <div className="space-y-6">
-                <InputFormField
-                  label="Email Address"
-                  name="email"
-                  control={form.control}
-                  placeholder="example@gmail.com"
-                  type="email"
-                />
-                <InputFormField
-                  label="Password"
-                  name="password"
-                  control={form.control}
-                  placeholder="******"
-                  type="password"
-                  forgetPassword
-                />
-              </div>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Welcome to Angel Admin</CardTitle>
+        <CardDescription>
+          Kindly fill in your details below to login
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit((data) => mutate(data))}
+            className="space-y-6"
+          >
+            <div className="space-y-6">
+              <InputFormField
+                label="Email Address"
+                name="email"
+                control={form.control}
+                placeholder="example@gmail.com"
+                type="email"
+              />
+              <InputFormField
+                label="Password"
+                name="password"
+                control={form.control}
+                placeholder="******"
+                type="password"
+                forgetPassword
+              />
+            </div>
 
-              <Button isLoading={isPending} type="submit" className="w-full">
-                Login
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+            <Button isLoading={isPending} type="submit" className="w-full">
+              Login
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 

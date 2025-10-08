@@ -13,14 +13,13 @@ import {
   CardTitle,
 } from '@/shared/components/server';
 import { useActionWithFeedbackAsync } from '@/shared/hooks';
-import { FC } from 'react';
 import { useForm } from 'react-hook-form';
 
 type PasswordStepProps = {
   onNext: () => void;
 };
 
-const PasswordStep: FC<PasswordStepProps> = ({ onNext }) => {
+const PasswordStep = ({ onNext }: PasswordStepProps) => {
   const email = localStorage.getItem('email') || '';
 
   const form = useForm<TResetPasswordSchema>({
