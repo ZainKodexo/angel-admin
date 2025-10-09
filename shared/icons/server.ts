@@ -19,6 +19,11 @@ import {
   Globe,
   MinusIcon,
   XIcon,
+  Check,
+  X,
+  Edit,
+  RotateCcw,
+  Info,
 } from 'lucide-react';
 
 export {
@@ -41,4 +46,9 @@ export {
   Globe,
   MinusIcon,
   XIcon,
+  Check,
+  X,
+  Edit,
+  RotateCcw,
+  Info,
 };

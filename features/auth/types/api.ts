@@ -33,7 +33,8 @@ type ForgetPasswordRequest = {
 };
 
 type VerifyOTPRequest = {
-  token: number;
+  email: string;
+  OTP: string;
 };
 
 type ResetPasswordRequest = {
@@ -69,7 +70,11 @@ interface AuthTokens {
   accessToken: string;
   refreshToken: string;
 }
-
+type Profile = {
+  id: string;
+  email: string;
+  full_name: string;
+};
 export type {
   AuthTokens,
   CreateAccountRequest,
@@ -84,4 +89,5 @@ export type {
   GoogleSignupRequest,
   GoogleSignupResponse,
   ValidatTokenResponse,
+  Profile,
 };

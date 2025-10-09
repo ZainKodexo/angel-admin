@@ -5,3 +5,5 @@ export * from './Card';
 export * from './Table';
 export * from './Spinner';
 export * from './Skeleton';
+export * from './Textarea';
+export * from './Badge';

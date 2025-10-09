@@ -30,11 +30,9 @@ const ForgetPasswordFlow = () => {
   };
 
   return (
-    <div className="grid h-full items-center justify-items-center overflow-auto">
-      <Card className="w-full">
-        <Step onNext={onNext} />
-      </Card>
-    </div>
+    <Card className="w-full">
+      <Step onNext={onNext} />
+    </Card>
   );
 };
 

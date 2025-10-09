@@ -23,3 +23,5 @@ export * from './FormField';
 export * from './Popover';
 export * from './Command';
 export * from './Checkbox';
+export * from './Tabs';
+export * from './Editor';

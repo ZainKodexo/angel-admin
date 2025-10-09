@@ -33,7 +33,7 @@ class ApiClient {
   }
 
   private async getHeaders(multipart = false): Promise<Headers> {
-    const token = this.cookieService.getCookie('access_token');
+    const token = await this.cookieService.getCookie('access_token');
 
     const headers = new Headers({
       ...API_CONFIG.defaultHeaders,
@@ -113,7 +113,6 @@ class ApiClient {
     const executeRequest = async () => {
       const headers = await this.getHeaders(options.multipart);
       const url = new URL(API_CONFIG.baseUrl + endpoint);
-
       const response = await fetch(url.toString(), {
         method,
         headers,

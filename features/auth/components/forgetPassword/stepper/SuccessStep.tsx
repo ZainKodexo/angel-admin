@@ -10,8 +10,9 @@ import { useRouter } from 'next/navigation';
 
 const SuccessStep = () => {
   const router = useRouter();
-  const action = async () => {
-    router.push('/login');
+
+  const action = () => {
+    router.push('/auth/login');
   };
 
   return (
@@ -24,13 +25,9 @@ const SuccessStep = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={action} className="w-full">
-          <div className="space-y-6">
-            <Button type="submit" className="w-full">
-              Confirm
-            </Button>
-          </div>
-        </form>
+        <Button type="button" onClick={action} className="w-full">
+          Confirm
+        </Button>
       </CardContent>
     </>
   );

@@ -1,6 +1,7 @@
 'use client';
 import { forgetPassword, verifyOtp } from '@/features/auth/actions';
 import { OtpStepSchemaResolver, TOtpStepSchema } from '@/features/auth/schemas';
+import { AUTH_QUERY } from '@/features/auth/utils';
 import {
   Button,
   Form,
@@ -20,7 +21,7 @@ import {
   CardTitle,
   Typography,
 } from '@/shared/components/server';
-import { useActionWithFeedback } from '@/shared/hooks';
+import { useActionWithFeedbackAsync, useCountDown } from '@/shared/hooks';
 import { useForm } from 'react-hook-form';
 
 type OtpStepProps = {
@@ -29,56 +30,69 @@ type OtpStepProps = {
 
 const OtpStep = ({ onNext }: OtpStepProps) => {
   const email = localStorage.getItem('email') || '';
-  const forgetPasswordAction = useActionWithFeedback(forgetPassword);
-  const verifyOtpAction = useActionWithFeedback(verifyOtp);
+  const { formatTime, isExpired, timeRemaining, resetTime } = useCountDown();
+
   const form = useForm<TOtpStepSchema>({
     resolver: OtpStepSchemaResolver,
     defaultValues: {
-      token: '',
+      OTP: '',
+    },
+  });
+
+  const resendEmailAction = useActionWithFeedbackAsync({
+    mutationFn: forgetPassword,
+    mutationKey: [AUTH_QUERY.VERIFY_TOKEN],
+  });
+
+  const verifyOtpAction = useActionWithFeedbackAsync({
+    mutationFn: verifyOtp,
+    mutationKey: [AUTH_QUERY.RESEND_EMAIL],
+    onSuccess: () => {
+      onNext();
     },
   });
 
   const resendEmail = async () => {
     const payload = { email: email };
-    await forgetPasswordAction.execute(payload);
+    await resendEmailAction.mutateAsync(payload);
+    form.reset();
+    resetTime();
   };
 
-  const action: () => void = form.handleSubmit(async (data) => {
-    const payload = { token: +data.token };
-    const { success } = await verifyOtpAction.execute(payload);
-    if (success) {
-      onNext();
+  const onVerify = async (data: TOtpStepSchema) => {
+    const payload = { email: email, OTP: data.OTP };
+    const response = await verifyOtpAction.mutateAsync(payload);
+    if (!response.success) {
+      form.reset();
     }
-  });
-
+  };
   return (
     <>
       <CardHeader>
         <CardTitle>Check your email</CardTitle>
         <CardDescription>
           We sent a reset link to{' '}
-          <span className="text-content-brand">{email} </span> enter 5 digit
-          code that mentioned in the email
+          <span className="text-primary font-semibold">{email} </span> enter 4
+          digit code that mentioned in the email
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form action={action} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onVerify)} className="space-y-6">
             <div className="flex justify-center space-y-4">
               <FormField
                 control={form.control}
-                name="token"
+                name="OTP"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <div className="flex w-fit justify-center">
-                        <InputOTP maxLength={5} {...field}>
+                      <div className="flex justify-center">
+                        <InputOTP maxLength={4} {...field}>
                           <InputOTPGroup>
                             <InputOTPSlot index={0} />
                             <InputOTPSlot index={1} />
                             <InputOTPSlot index={2} />
                             <InputOTPSlot index={3} />
-                            <InputOTPSlot index={4} />
                           </InputOTPGroup>
                         </InputOTP>
                       </div>
@@ -89,7 +103,11 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
               />
             </div>
 
-            <Button type="submit" className="w-full">
+            <Button
+              isLoading={verifyOtpAction.isPending}
+              type="submit"
+              className="w-full"
+            >
               Reset Password
             </Button>
 
@@ -102,10 +120,27 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
         </Form>
       </CardContent>
       <CardFooter className="justify-center">
-        Haven&apos;t got the email yet?
-        <Button onClick={resendEmail} variant="link">
-          Resend Email
-        </Button>
+        {isExpired ? (
+          <>
+            Haven&apos;t got the email yet?
+            <Button
+              onClick={resendEmail}
+              disabled={resendEmailAction.isPending}
+              variant="link"
+            >
+              Resend Email
+            </Button>
+          </>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Typography.BodyRegularMedium className="text-muted-foreground">
+              Code expires in:
+            </Typography.BodyRegularMedium>
+            <Typography.BodySemiboldMedium className="text-primary">
+              {formatTime(timeRemaining)}
+            </Typography.BodySemiboldMedium>
+          </div>
+        )}
       </CardFooter>
     </>
   );
