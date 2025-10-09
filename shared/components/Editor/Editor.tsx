@@ -41,8 +41,31 @@ export const Editor: FC<EditorProps> = ({ html_content, onChange }) => {
           'bold italic forecolor | alignleft aligncenter ' +
           'alignright alignjustify | bullist numlist outdent indent | ' +
           'removeformat | help',
-        content_style:
-          'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+        content_style: `
+          body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            max-width: 100%;
+            box-sizing: border-box;
+          }
+          p, div, span, td {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+          }
+          table {
+            table-layout: fixed;
+            width: 100%;
+          }
+          img {
+            max-width: 100%;
+            height: auto;
+          }
+          `,
+        statusbar: false,
       }}
       onInit={(_, editor) => {
         editor.on('click', (e: any) => {

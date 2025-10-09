@@ -25,7 +25,13 @@ export const PromptCard = (prompt: TPrompt) => {
   );
 
   const { mutate, isPending } = useActionWithFeedback({
-    mutationFn: updatePrompt,
+    mutationFn: async () => {
+      if (promptContent.trim() === '') {
+        setPromptContent(prompt.content);
+        throw new Error('Prompt is required');
+      }
+      return await updatePrompt({ id: prompt.id, content: promptContent });
+    },
     mutationKey: PromptQueryKey.prompt.update(prompt.id),
     onSuccess: () => {
       editCancelToggle();

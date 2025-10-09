@@ -25,7 +25,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light">
           <ReactQueryProvider>
             <NextTopLoader showSpinner={false} color="#759b6d" />
-            <Toaster />
+            <Toaster richColors />
             {children}
             <GlobalModal />
           </ReactQueryProvider>
