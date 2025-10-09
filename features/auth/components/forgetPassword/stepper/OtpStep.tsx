@@ -21,10 +21,7 @@ import {
   CardTitle,
   Typography,
 } from '@/shared/components/server';
-import {
-  useActionWithFeedback,
-  useActionWithFeedbackAsync,
-} from '@/shared/hooks';
+import { useActionWithFeedbackAsync, useCountDown } from '@/shared/hooks';
 import { useForm } from 'react-hook-form';
 
 type OtpStepProps = {
@@ -33,6 +30,7 @@ type OtpStepProps = {
 
 const OtpStep = ({ onNext }: OtpStepProps) => {
   const email = localStorage.getItem('email') || '';
+  const { formatTime, isExpired, timeRemaining, resetTime } = useCountDown();
 
   const form = useForm<TOtpStepSchema>({
     resolver: OtpStepSchemaResolver,
@@ -41,7 +39,7 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
     },
   });
 
-  const resendEmailAction = useActionWithFeedback({
+  const resendEmailAction = useActionWithFeedbackAsync({
     mutationFn: forgetPassword,
     mutationKey: [AUTH_QUERY.VERIFY_TOKEN],
   });
@@ -56,7 +54,9 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
 
   const resendEmail = async () => {
     const payload = { email: email };
-    resendEmailAction.mutate(payload);
+    await resendEmailAction.mutateAsync(payload);
+    form.reset();
+    resetTime();
   };
 
   const onVerify = async (data: TOtpStepSchema) => {
@@ -120,10 +120,27 @@ const OtpStep = ({ onNext }: OtpStepProps) => {
         </Form>
       </CardContent>
       <CardFooter className="justify-center">
-        Haven&apos;t got the email yet?
-        <Button onClick={resendEmail} variant="link">
-          Resend Email
-        </Button>
+        {isExpired ? (
+          <>
+            Haven&apos;t got the email yet?
+            <Button
+              onClick={resendEmail}
+              disabled={resendEmailAction.isPending}
+              variant="link"
+            >
+              Resend Email
+            </Button>
+          </>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Typography.BodyRegularMedium className="text-muted-foreground">
+              Code expires in:
+            </Typography.BodyRegularMedium>
+            <Typography.BodySemiboldMedium className="text-primary">
+              {formatTime(timeRemaining)}
+            </Typography.BodySemiboldMedium>
+          </div>
+        )}
       </CardFooter>
     </>
   );

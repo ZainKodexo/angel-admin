@@ -106,7 +106,7 @@ export const EmailTemplate = (email: TEmail) => {
           <Editor html_content={email.html_content} onChange={onEditorChange} />
         ) : (
           <div
-            className="bg-muted overflow-y-auto rounded-md p-4"
+            className="bg-muted overflow-y-auto rounded-md p-4 [&_a]:pointer-events-none"
             dangerouslySetInnerHTML={{ __html: email.html_content }}
           />
         )}

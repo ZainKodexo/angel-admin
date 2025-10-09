@@ -17,4 +17,5 @@ const NAV_ITEMS = [
   },
 ];
 
-export { NAV_ITEMS };
+const OTP_EXPIRY_TIME = 5 * 60;
+export { NAV_ITEMS, OTP_EXPIRY_TIME };
