@@ -26,7 +26,7 @@ export const EmailTemplate = (email: TEmail) => {
     mutationFn: updateEmail,
     mutationKey: EmailQueryKey.email.update(email.id),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: EmailQueryKey.email.all });
+      queryClient.invalidateQueries({ queryKey: EmailQueryKey.email.all() });
     },
   });
 

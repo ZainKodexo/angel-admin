@@ -1,7 +1,12 @@
 import { EmailTemplatePage } from '@/features/email-template/pages';
+import { Suspense } from 'react';
 
 const EmailTemplate = () => {
-  return <EmailTemplatePage />;
+  return (
+    <Suspense>
+      <EmailTemplatePage />
+    </Suspense>
+  );
 };
 
 export default EmailTemplate;

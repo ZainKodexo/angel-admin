@@ -3,9 +3,19 @@ import { api } from '@/shared/lib';
 import { PaginatedResponse } from '@/shared/types';
 import { TEmail } from '../types';
 
-export const getAllEmails = async () => {
+export const getAllEmails = async ({
+  language = 'English',
+}: {
+  language?: string;
+}) => {
+  const params = new URLSearchParams(
+    `/email-content/?page=1&page_size=10&sort_order=-1`,
+  );
+  if (language) {
+    params.set('language', language);
+  }
   return await api.get<PaginatedResponse<TEmail>>(
-    '/email-content/?page=1&page_size=10&sort_order=-1',
+    decodeURIComponent(params.toString()),
   );
 };
 

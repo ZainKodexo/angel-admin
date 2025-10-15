@@ -1,5 +1,5 @@
 import { Typography } from '@/shared/components/Typography';
-import { Email } from '../components';
+import { Email, EmailLanguageFilter } from '../components';
 import {
   Card,
   CardContent,
@@ -19,6 +19,9 @@ export const EmailTemplatePage = () => {
           Customize email templates sent to clients. Use placeholders to
           personalize messages with dynamic content.
         </Typography.BodyRegularMedium>
+      </div>
+      <div className="flex justify-end">
+        <EmailLanguageFilter />
       </div>
       {/* Prompts */}
       <Email />
