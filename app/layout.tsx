@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 import './globals.css';
 import { ReactQueryProvider } from '@/shared/providers';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 const inter = Recursive({ subsets: ['latin'] });
 
@@ -23,12 +24,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning={true}>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light">
-          <ReactQueryProvider>
-            <NextTopLoader showSpinner={false} color="#759b6d" />
-            <Toaster richColors />
-            {children}
-            <GlobalModal />
-          </ReactQueryProvider>
+          <NuqsAdapter>
+            <ReactQueryProvider>
+              <NextTopLoader showSpinner={false} color="#759b6d" />
+              <Toaster richColors />
+              {children}
+              <GlobalModal />
+            </ReactQueryProvider>
+          </NuqsAdapter>
         </ThemeProvider>
       </body>
     </html>

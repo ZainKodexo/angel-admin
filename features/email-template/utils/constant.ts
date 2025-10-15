@@ -8,3 +8,18 @@ export const PROMPTCATEGORY = [
     value: 'single',
   },
 ];
+
+export const LANGUAGES = [
+  {
+    value: 'English',
+    label: 'English',
+  },
+  {
+    value: 'German',
+    label: 'German',
+  },
+  {
+    value: 'Spanish',
+    label: 'Spanish',
+  },
+];

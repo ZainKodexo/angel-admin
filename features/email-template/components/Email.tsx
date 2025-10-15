@@ -1,5 +1,6 @@
 'use client';
 import { Skeleton } from '@/shared/components/server';
+import { useQueryState } from 'nuqs';
 import { useGetAllEmails } from '../hooks';
 import { EmailTemplate } from './EmailTemplate';
 import { EmailsNotFound } from './EmailsNotFound';
@@ -9,7 +10,8 @@ export const Email = () => {
 };
 
 const EmailContent = () => {
-  const { data, isLoading } = useGetAllEmails();
+  const [language] = useQueryState('lang', { defaultValue: 'English' });
+  const { data, isLoading } = useGetAllEmails(language);
 
   if (isLoading) {
     return (

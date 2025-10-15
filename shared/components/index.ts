@@ -25,3 +25,4 @@ export * from './Command';
 export * from './Checkbox';
 export * from './Tabs';
 export * from './Editor';
+export * from './Combobox';
