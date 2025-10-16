@@ -31,7 +31,7 @@ export function EmailLanguageFilter() {
         >
           {language
             ? LANGUAGES.find((framework) => framework.value === language)?.label
-            : 'Select framework...'}
+            : 'Select Language'}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
