@@ -5,11 +5,13 @@ import NextTopLoader from 'nextjs-toploader';
 import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 import './globals.css';
+import { ReactQueryProvider } from '@/shared/providers';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 const inter = Recursive({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'PROJECT NAME',
+  title: 'Angel Admin',
   description: 'PROJECT DESCRIPTION',
 };
 
@@ -21,11 +23,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" enableSystem>
-          <NextTopLoader showSpinner={false} color="#ffffff" />
-          <Toaster />
-          {children}
-          <GlobalModal />
+        <ThemeProvider attribute="class" defaultTheme="light">
+          <NuqsAdapter>
+            <ReactQueryProvider>
+              <NextTopLoader showSpinner={false} color="#759b6d" />
+              <Toaster richColors />
+              {children}
+              <GlobalModal />
+            </ReactQueryProvider>
+          </NuqsAdapter>
         </ThemeProvider>
       </body>
     </html>

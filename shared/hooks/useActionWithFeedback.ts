@@ -1,8 +1,7 @@
 'use client';
-
-import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
 import type { ApiResponse } from '@/shared/types';
+import { useMutation, UseMutationOptions } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 type Position =
   | 'top-right'
@@ -15,11 +14,6 @@ type Position =
 interface ToastConfig {
   duration?: number;
   position?: Position;
-}
-
-interface ToastOptions extends ToastConfig {
-  successMessage?: string;
-  errorMessage?: string;
 }
 
 const DEFAULT_TOAST_CONFIG: Required<ToastConfig> = {
@@ -48,54 +42,42 @@ const createErrorResponse = <R>(message: string): ApiResponse<R> => ({
   data: null as R,
 });
 
-function useActionWithFeedback<T, R>(
-  action: (data: T) => Promise<ApiResponse<R>>,
-  options: ToastOptions = {},
-) {
-  const [isLoading, setIsLoading] = useState(false);
+interface ActionWithFeedbackProps<T, R>
+  extends UseMutationOptions<ApiResponse<R>, Error, T> {
+  onSuccess?: () => void;
+  onError?: (error: Error, variables: T, context: unknown) => void;
+  successToast?: boolean;
+}
 
-  const execute = useCallback(
-    async (data: T): Promise<ApiResponse<R>> => {
-      setIsLoading(true);
-
-      try {
-        const response = await action(data);
-        const toastConfig = {
-          duration: options.duration,
-          position: options.position,
-        };
-
-        if (response.success) {
-          showToast(
-            'success',
-            options.successMessage || response.message || 'Success',
-            toastConfig,
-          );
-          return response;
+function useActionWithFeedback<T, R>({
+  onSuccess,
+  onError,
+  successToast = true,
+  ...mutationOptions
+}: ActionWithFeedbackProps<T, R>) {
+  const { mutate, isPending } = useMutation({
+    onSuccess: (data: ApiResponse<R>, _variables: T, _context: unknown) => {
+      if (data.success) {
+        if (successToast) {
+          showToast('success', data.message || 'Success');
         }
-
-        showToast(
-          'error',
-          options.errorMessage || response.message || 'An error occurred',
-          toastConfig,
-        );
-        return response;
-      } catch (error) {
-        showToast('error', 'An unexpected error occurred', {
-          duration: options.duration,
-          position: options.position,
-        });
-        return createErrorResponse<R>('An unexpected error occurred');
-      } finally {
-        setIsLoading(false);
+        onSuccess?.();
+        return data;
       }
+      showToast('error', data.message || 'An error occurred');
+      return data;
     },
-    [action, options],
-  );
+    onError: (error: Error, variables: T, context: unknown) => {
+      showToast('error', error.message || 'An unexpected error occurred');
+      onError?.(error, variables, context);
+      return createErrorResponse<R>('An unexpected error occurred');
+    },
+    ...mutationOptions,
+  });
 
   return {
-    execute,
-    isLoading,
+    mutate,
+    isPending,
   };
 }
 

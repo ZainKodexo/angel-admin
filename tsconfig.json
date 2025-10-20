@@ -69,6 +69,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    "shared/components/CodeExpireCountdown"
   ]
 }

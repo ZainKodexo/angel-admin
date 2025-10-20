@@ -4,6 +4,7 @@ import {
   ResetPasswordSchemaResolver,
   TResetPasswordSchema,
 } from '@/features/auth/schemas';
+import { AUTH_QUERY } from '@/features/auth/utils';
 import { Button, Form, InputFormField } from '@/shared/components';
 import {
   CardContent,
@@ -11,14 +12,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/components/server';
-import { useActionWithFeedback } from '@/shared/hooks';
-import { useRouter } from 'next/navigation';
+import { useActionWithFeedbackAsync } from '@/shared/hooks';
 import { useForm } from 'react-hook-form';
 
-const PasswordStep = () => {
-  const router = useRouter();
+type PasswordStepProps = {
+  onNext: () => void;
+};
+
+const PasswordStep = ({ onNext }: PasswordStepProps) => {
   const email = localStorage.getItem('email') || '';
-  const resetPasswordAction = useActionWithFeedback(resetPassword);
 
   const form = useForm<TResetPasswordSchema>({
     resolver: ResetPasswordSchemaResolver,
@@ -28,16 +30,19 @@ const PasswordStep = () => {
     },
   });
 
-  const action: () => void = form.handleSubmit(async (data) => {
-    const payload = { ...data, email: email };
-    const { success } = await resetPasswordAction.execute(payload);
-
-    if (success) {
-      router.push('login');
-      localStorage.removeItem('email');
-    }
+  const { mutateAsync, isPending } = useActionWithFeedbackAsync({
+    mutationFn: resetPassword,
+    mutationKey: [AUTH_QUERY.RESET_PASSWORD],
   });
 
+  const onResetPassword = async (data: TResetPasswordSchema) => {
+    const payload = { ...data, email: email };
+    const { success } = await mutateAsync(payload);
+    if (success) {
+      localStorage.removeItem('email');
+      onNext();
+    }
+  };
   return (
     <>
       <CardHeader>
@@ -49,7 +54,10 @@ const PasswordStep = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form action={action} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onResetPassword)}
+            className="space-y-6"
+          >
             <div className="space-y-4">
               <InputFormField
                 control={form.control}
@@ -66,7 +74,7 @@ const PasswordStep = () => {
                 label="Confirm Password"
               />
             </div>
-            <Button type="submit" className="w-full">
+            <Button isLoading={isPending} type="submit" className="w-full">
               Update Password
             </Button>
           </form>

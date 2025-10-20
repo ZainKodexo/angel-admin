@@ -61,7 +61,10 @@ const InputFormField = <T extends FieldValues>({
               {label}
             </FormLabel>
             {forgetPassword && (
-              <Link href="/auth/forget-password" className="text-sm">
+              <Link
+                href="/auth/forget-password"
+                className="text-sm hover:underline"
+              >
                 Forget Password?
               </Link>
             )}
